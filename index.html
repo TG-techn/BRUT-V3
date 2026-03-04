@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricky Brut - Decentralized Ecosystem</title>
+    <script src="https://cdnjs.cloudflare.com"></script>
+    <style>
+        :root {
+            --primary-bg: #fffbf0; --card-bg: #ffffff; --text-color: #5d4037;
+            --accent-green: #4caf50; --accent-blue: #1e88e5; --accent-purple: #7b1fa2;
+            --accent-gray: #455a64; --accent-gold: #ffb300;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--primary-bg); margin: 0; padding: 20px; display: flex; justify-content: center; color: var(--text-color); }
+        .container { width: 100%; max-width: 450px; text-align: center; }
+        
+        /* Animations */
+        .coin-logo { width: 80px; height: 80px; margin: 10px auto; display: block; border-radius: 50%; box-shadow: 0 0 20px rgba(255,179,0,0.4); animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+
+        /* Cards & UI Elements */
+        .card { background: var(--card-bg); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: left; }
+        .mining-center { background-color: #e8f5e9; border: 1px solid #c8e6c9; }
+        .staking-hub { background-color: #e3f2fd; border: 1px solid #bbdefb; }
+        .section-title { font-weight: bold; font-size: 14px; margin-bottom: 12px; text-transform: uppercase; text-align: center; }
+
+        /* Progress Bar */
+        .progress-bg { background: #eee; border-radius: 10px; height: 10px; margin: 8px 0; overflow: hidden; }
+        .progress-fill { background: var(--accent-gold); height: 100%; width: 0%; transition: 1s; }
+
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; text-align: center; outline: none; }
+        button { padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #ccc !important; cursor: not-allowed; }
+        
+        .btn-mine { background: var(--accent-green); }
+        .btn-stake { background: var(--accent-blue); }
+        .btn-harvest { background: var(--accent-gray); }
+        .btn-auto { background: var(--accent-purple); }
+        .btn-connect { background: var(--accent-gold); color: #333; font-size: 16px; margin-top: 15px; }
+        .btn-add-metamask { background: none; color: var(--accent-blue); border: 1px solid var(--accent-blue); font-size: 11px; width: auto; padding: 5px 10px; margin: 10px auto; display: block; }
+
+        /* Stats & Lists */
+        .ref-box { background: #fdf5e6; border: 1px dashed var(--accent-gold); padding: 10px; border-radius: 10px; margin-top: 10px; text-align: center; }
+        .faq-item { border-bottom: 1px solid #eee; padding: 10px 0; cursor: pointer; }
+        .faq-a { display: none; color: #666; font-size: 12px; padding-top: 5px; }
+        .admin-section { display: none; background: #fff0f0; border: 2px solid #d32f2f; border-radius: 15px; padding: 15px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="https://turquoise-cheap-gazelle-650.mypinata.cloud/ipfs/bafybeidxbqamvpfxy672swkmg5aftlfc34sp6worj6q3avykarzat2ty6m" class="coin-logo">
+        <h2 style="margin:5px 0;">Ricky Brut</h2>
+        <small style="color:gray">Anti-Inflationary Mining Ecosystem</small>
+    </div>
+
+    <div class="card">
+        <center>
+            <small>DOMPET ANDA</small>
+            <h2 id="balance">0.00 BRUT</h2>
+            <div id="ref-section" class="ref-box" style="display:none;">
+                <small>LINK REFERRAL:</small><br>
+                <code id="myAddr" style="font-size:10px;">0x...</code><br>
+                <button onclick="copyRef()" style="width:auto; padding:3px 10px; font-size:10px; background:var(--accent-gold); color:#333;">SALIN</button>
+            </div>
+            <button id="connectBtn" class="btn-connect" onclick="connect()">HUBUNGKAN DOMPET</button>
+            <button class="btn-add-metamask" onclick="addTokenToMetaMask()">+ Tambah BRUT ke MetaMask</button>
+        </center>
+        <div style="display:flex; justify-content: space-around; margin-top:15px; font-size:12px; border-top:1px solid #eee; padding-top:10px;">
+            <div>Referral: <b id="refCount">0</b></div>
+            <div>Bonus: <b id="refBonus">0</b> BRUT</div>
+        </div>
+    </div>
+
+    <div class="card mining-center">
+        <div class="section-title" style="color: var(--accent-green);">⛏️ Mining Center</div>
+        <div class="progress-bg"><div id="halvBar" class="progress-fill"></div></div>
+        <div style="display:flex; justify-content: space-between; font-size: 10px; margin-bottom:10px;">
+            <span>MENUJU HALVING</span> <span id="halvPerc">0%</span>
+        </div>
+        <input type="text" id="refInput" placeholder="Referral Address (Opsional)">
+        <button id="mineBtn" class="btn-mine" onclick="mine()">MINE (TAMBANG)</button>
+        <center><small id="mineTimer" style="color:red; display:none; font-size:11px; margin-top:5px;"></small></center>
+    </div>
+
+    <div class="card staking-hub">
+        <div class="section-title" style="color: var(--accent-blue);">🥩 Staking Hub (10% APY)</div>
+        <div style="display:flex; justify-content: space-between; margin-bottom:10px;">
+            <div><small>Staked</small><br><b id="stakedVal">0</b></div>
+            <div><small>Reward</small><br><b id="rewardVal" style="color:green">0</b></div>
+        </div>
+        <input type="number" id="stakeIn" placeholder="Jumlah BRUT">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn-stake" onclick="stake()">STAKE</button>
+            <button class="btn-harvest" onclick="harvest()">HARVEST</button>
+        </div>
+        <button class="btn-auto" onclick="compound()">✨ AUTO-COMPOUND ✨</button>
+        <center><button style="background:none; color:gray; font-size:11px; margin-top:8px;" onclick="unstake()">Unstake All</button></center>
+    </div>
+
+    <div class="card">
+        <div class="section-title">📊 Tokenomics</div>
+        <div style="font-size:12px; line-height:1.6;">
+            • <b>Max Supply:</b> 21.000.000 BRUT<br>
+            • <b>Halving:</b> Tiap 5.000 BRUT tertambang<br>
+            • <b>Referral:</b> 20 BRUT / Teman<br>
+            • <b>Fee:</b> 0.1% Pajak Transfer
+        </div>
+    </div>
+
+    <div id="adminPanel" class="admin-section">
+        <div class="section-title" style="color:#d32f2f">🛠️ OWNER ADMIN</div>
+        <small>Supply: <b id="ts">0</b> / 21M</small>
+        <button style="background:#d32f2f" onclick="lockOwner()">LOCK OWNER TOKENS (1YR)</button>
+    </div>
+
+    <div class="card">
+        <div class="section-title">❓ FAQ</div>
+        <div class="faq-item" onclick="toggleFaq(this)"><b>Bagaimana cara mining?</b><div class="faq-a">Klik MINE tiap 1 menit. Gunakan referral teman untuk bonus.</div></div>
+        <div class="faq-item" onclick="toggleFaq(this)"><b>Apa itu Auto-Compound?</b><div class="faq-a">Memasukkan reward staking Anda kembali ke modal secara otomatis.</div></div>
+    </div>
+</div>
+
+<script>
+    let signer, contract;
+    const contractAddr = "0xfD9025c305FF463370C27746C8C72b60D753191d";
+    const abi = [
+        "function balanceOf(address) view returns (uint256)", "function mine(address) public", "function stake(uint256) public",
+        "function compoundReward() public", "function claimStakeReward() public", "function withdrawStake() public",
+        "function stakedAmount(address) view returns (uint256)", "function calculateReward(address) view returns (uint256)",
+        "function referralCount(address) view returns (uint256)", "function lastMined(address) view returns (uint256)",
+        "function nextHalvingSupply() view returns (uint256)", "function totalSupply() view returns (uint256)",
+        "function owner() view returns (address)", "function lockOwnerTokensForOneYear() public"
+    ];
+
+    async function connect() {
+        if (!window.ethereum) return alert("Pasang MetaMask!");
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        const addr = await signer.getAddress();
+        contract = new ethers.Contract(contractAddr, abi, signer);
+        document.getElementById('connectBtn').innerText = "CONNECTED: " + addr.substring(0,6) + "...";
+        document.getElementById('myAddr').innerText = addr;
+        document.getElementById('ref-section').style.display = "block";
+        update(); setInterval(update, 10000);
+    }
+
+    async function update() {
+        try {
+            const addr = await signer.getAddress();
+            const [bal, stk, rew, ref, ts, nextH, owner, last] = await Promise.all([
+                contract.balanceOf(addr), contract.stakedAmount(addr), contract.calculateReward(addr),
+                contract.referralCount(addr), contract.totalSupply(), contract.nextHalvingSupply(),
+                contract.owner(), contract.lastMined(addr)
+            ]);
+
+            document.getElementById('balance').innerText = ethers.formatEther(bal) + " BRUT";
+            document.getElementById('stakedVal').innerText = ethers.formatEther(stk);
+            document.getElementById('rewardVal').innerText = ethers.formatEther(rew);
+            document.getElementById('refCount').innerText = ref.toString();
+            document.getElementById('refBonus').innerText = (Number(ref) * 20);
+            
+            // Halving Progress
+            const tsEth = parseFloat(ethers.formatEther(ts));
+            const nextHEth = parseFloat(ethers.formatEther(nextH));
+            const prog = ((tsEth - (nextHEth - 5000)) / 5000) * 100;
+            document.getElementById('halvBar').style.width = prog + "%";
+            document.getElementById('halvPerc').innerText = prog.toFixed(1) + "%";
+
+            // Mining Timer
+            const diff = (Number(last) + 60) - Math.floor(Date.now() / 1000);
+            const mBtn = document.getElementById('mineBtn');
+            const mTim = document.getElementById('mineTimer');
+            if(diff > 0) { mBtn.disabled = true; mTim.style.display = "block"; mTim.innerText = `Tunggu ${diff}s lagi...`; }
+            else { mBtn.disabled = false; mTim.style.display = "none"; }
+
+            if(addr.toLowerCase() === owner.toLowerCase()) {
+                document.getElementById('adminPanel').style.display = "block";
+                document.getElementById('ts').innerText = tsEth.toFixed(0);
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function mine() { try { const tx = await contract.mine(document.getElementById('refInput').value || "0x0000000000000000000000000000000000000000"); await tx.wait(); update(); } catch(e) { alert("Mining Gagal!"); } }
+    async function stake() { try { const tx = await contract.stake(ethers.parseEther(document.getElementById('stakeIn').value)); await tx.wait(); update(); } catch(e) { alert("Gagal!"); } }
+    async function harvest() { const tx = await contract.claimStakeReward(); await tx.wait(); update(); }
+    async function compound() { const tx = await contract.compoundReward(); await tx.wait(); update(); }
+    async function unstake() { const tx = await contract.withdrawStake(); await tx.wait(); update(); }
+    async function lockOwner() { await contract.lockOwnerTokensForOneYear(); alert("Locked!"); }
+
+    async function addTokenToMetaMask() {
+        try {
+            await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: contractAddr, symbol: 'BRUT', decimals: 18, image: 'https://turquoise-cheap-gazelle-650.mypinata.cloud/ipfs/bafybeidxbqamvpfxy672swkmg5aftlfc34sp6worj6q3avykarzat2ty6m' }}});
+        } catch (e) { console.log(e); }
+    }
+
+    function copyRef() { navigator.clipboard.writeText(document.getElementById('myAddr').innerText); alert("Alamat Tersalin!"); }
+    function toggleFaq(el) { const a = el.querySelector('.faq-a'); a.style.display = a.style.display === "block" ? "none" : "block"; }
+</script>
+</body>
+</html>
